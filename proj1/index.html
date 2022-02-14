@@ -38,7 +38,7 @@
 
 <h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
 
-<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+<!-- <p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
 
 <div align="middle">
   <table style="width=100%">
@@ -64,12 +64,44 @@
       </td>
     </tr>
   </table>
+</div> -->
+
+
+<p>We will start with the unoptimized naive implementation.</p>
+<p>Because computers save data in a pixel world, which is typically made of rows and columns, it is the most convenient for us to determine what the shape and size and location of the triangle we are attempting to rasterize is. We will start from the lowest pixel in the x-axis and the y-axis, to the highest, by determining the boundary with <b>min(x0, x1, x2)</b>, <b>max(y0, y1, y2)</b> etc.</p>
+<p>Also, because I want the center of the pixel instead of the bottom left, we will floor the point, and add 0.5 to it. Every iteration, we will move the pixel by one. In this process, we will determine whether the point we are rasterizing is in the triangle by using the line test formula in the class.</p>
+<p>Because the class slide’s version assumes vertices are in clockwise direction, in our implementation, we want three line tests’ result to be greater than or equal to 0 <b>OR</b> less than or equal to 0 at the same time, in case vertices are in counterclockwise direction.</p>
+
+<p>If the point is in the triangle, rasterize this point with the given color.</p>
+<p>This is exactly equal to “one that checks each sample within the bounding box of the triangle”, because this is the way our naive implementation does.</p>
+
+<p>If the point is in the triangle, rasterize this point with the given color.</p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/task1-1.png" align="middle" width="400px"/>
+        <figcaption align="middle">Basic Test 4</figcaption>
+      </td>
+    </tr>
+  </table>
 </div>
 
+<p>In terms of the optimizations that we made, at first we tried to rearrange the for loops so that we will first go through the x-axis and then next y-axis. This is in order to achieve better cache temporal locality. And then, in looping the row, as long as it ever gets into the triangle and then gets out, there is no more need to continue in this row, so we break. This achieved in general ¾ time spent in one draw call. The C++ high resolution clock shows that the naive solution solves in 0.004s for basic test 5, but 0.003s spent for this optimization.</p>
+<p>Another optimization we tried is to use the vertices with median x coordinate, draw a vertical line and find the intersection with the line between the remaining two vertices, getting the base length. Then respectively multiply it by <b>abs(median x - two other x coordinates)</b>, getting the area (no need to divide it by 2 for performance purpose). We start from the left side if the left triangle’s area is smaller, or the right side if the right triangle is smaller. This can avoid the situation when, for example, a right triangle whose right vertex is on the right boundary, so that our first optimization may not work at all. This achieved a slightly better performance, from 0.003s improved to 0.0028s.</p>
 
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/task1-2.png" align="middle" width="400px"/>
+        <figcaption align="middle">Time Comparison Table</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 <h3 align="middle">Part 2: Antialiasing triangles</h3>
-
-
 
 <h3 align="middle">Part 3: Transforms</h3>
 
