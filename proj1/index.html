@@ -151,7 +151,7 @@
 
 
 <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
-<p>Our solution to task 5 is based on task 2’s solution. After we tested that a point is inside the triangle, we calculate the point’s relative position inside this triangle using the barycentric formula. The relative distance from this point to the three vertices will be the weights for the three vertices’ results of the texture.</p>
+<p>Our solution to task 5 is based on task 2’s solution. After we tested that a point is inside the triangle, we calculate the point’s relative position inside this triangle using the barycentric formula. The relative distance from this point to the three vertices will be the weights for the three vertices’ results of the texture, sicne we know the texture's triangle vertices.</p>
 <p>Now the resulting <b>p_uv</p> is a Vertex2D with two points from 0 to 1. The nearest point sampling will round the two points to the nearest integrals. This will get the nearest texel in the texture.</p>
 <p>The bilinear sampling is more complex. We basically will sample the 4 surrounding texels, then use lerp and other techniques taught in the lecture to weight the results from these 4 texels according to their distances to the sampling point.</p>
 
@@ -163,8 +163,6 @@
         <img src="images/task5-1.png" align="middle" width="400px"/>
         <figcaption align="middle">Nearest Sampling, Rate 1</figcaption>
       </td>
-    </tr>
-    <tr>
       <td>
         <img src="images/task5-2.png" align="middle" width="400px"/>
         <figcaption align="middle">Nearest Sampling, Rate 16</figcaption>
@@ -176,8 +174,6 @@
         <img src="images/task5-3.png" align="middle" width="400px"/>
         <figcaption align="middle">Bilinear Sampling, Rate 1</figcaption>
       </td>
-    </tr>
-    <tr>
       <td>
         <img src="images/task5-4.png" align="middle" width="400px"/>
         <figcaption align="middle">Bilinear Sampling, Rate 16</figcaption>
