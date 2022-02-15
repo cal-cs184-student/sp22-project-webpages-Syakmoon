@@ -25,7 +25,7 @@
 
 <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2018</h1>
 <h1 align="middle">Project 1: Rasterizer</h1>
-<h2 align="middle">YOUR NAME, CS184-??</h2>
+<h2 align="middle">Zhuowen Chen, Tian Liu, CS184-Spring 2022</h2>
 
 <br><br>
 
@@ -75,13 +75,11 @@
 <p>If the point is in the triangle, rasterize this point with the given color.</p>
 <p>This is exactly equal to “one that checks each sample within the bounding box of the triangle”, because this is the way our naive implementation does.</p>
 
-<p>If the point is in the triangle, rasterize this point with the given color.</p>
-
 <div align="middle">
   <table style="width=100%">
     <tr>
       <td>
-        <img src="images/task1-1.png" align="middle" width="400px"/>
+        <img src="images/task1-1.png" align="middle" width="1000px"/>
         <figcaption align="middle">Basic Test 4</figcaption>
       </td>
     </tr>
@@ -95,7 +93,7 @@
   <table style="width=100%">
     <tr>
       <td>
-        <img src="images/task1-2.png" align="middle" width="400px"/>
+        <img src="images/task1-2.png" align="middle" width="1000px"/>
         <figcaption align="middle">Time Comparison Table</figcaption>
       </td>
     </tr>
@@ -103,6 +101,46 @@
 </div>
 <h3 align="middle">Part 2: Antialiasing triangles</h3>
 
+
+<p>Supersampling is useful because we want to get rid of the jigsaws resulting from low sample rate (pixel is always too low for continuous non-horizontal and non-vertical lines).</p>
+
+<p>By sampling a pixel several times, we get the average color on that pixel. This will make that pixel not that “absolute”. Instead of either having the point or having no point, we can achieve a “having part of the point” effect. For example, if the point is black and the background is white, without supersampling, the pixel is either pure black or pure white, but supersampling may make it gray. From the macro view, lines may no longer be disconnected, and margins are more soft.</p>
+<p>Our implementation is based primarily on the task 1’s, but instead of from <b>floor(min(x0, x1, x2)) + 0.5</b>, we do <b>floor(min(x0, x1, x2)) + (1 / sqrt(sample_rate)) / 2</b>, and the same for y. For instance, the sample_rate is 4, and we split the pixel into 4 subpixels, we are now at the bottom left subpixel’s center! Then we do another two for loops inside these big for loops, to go through the centers of the subpixels, and test if the subpixel is in the triangle. If so, we put the color inside the special sample_buffer. Our sample_buffer is managed so that, if the sample_rate is 4, the four subpixels of the bottom left pixel, takes the first 4 indices in the order from left to right, and then from bottom to up. Then the same order for the pixels. At the end, the resolve_to_framebuffer method will unpack the pixel into subpixels, and then take the average of them as the color for this pixel.</p>
+
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/task2-1.png" align="middle" width="400px"/>
+        <figcaption align="middle">Supersamlping Rate 1</figcaption>
+      </td>
+      <td>
+        <img src="images/task2-2.png" align="middle" width="400px"/>
+        <figcaption align="middle">Supersamlping Rate 4</figcaption>
+      </td>
+      <td>
+        <img src="images/task2-3.png" align="middle" width="400px"/>
+        <figcaption align="middle">Supersamlping Rate 16</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p>In lower supersampling rate, the tip of this triangle is too skinny for a pixel, so that the in-triangle test may simply fail. But higher supersampling rate allows testing more points in more equally distributed points in the pixel, and found that not all the points are outside of the triangle. Then it becomes a shallow pink. From the macro view, the triangle is now connected at 16 sample_rate, in contrast to the disconnected parts at 1 sample_rate.</p>
+<p>We will start with the unoptimized naive implementation.</p>
+
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/task2-4.png" align="middle" width="1000px"/>
+        <figcaption align="middle">Jittered Supersamlping Rate 1</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p>We implemented jittered sampling, which instead of sampling at the subpixel’s center—-what we did in grid-based sampling—-we sample at a random point in the subpixels. This achieves a result that the margins are more “coarse”, and is not that smooth compared to the grid-based result.</p>
 <h3 align="middle">Part 3: Transforms</h3>
 
 
