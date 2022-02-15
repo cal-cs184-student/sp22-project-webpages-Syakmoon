@@ -33,35 +33,6 @@
 
 <h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
 
-<!-- <p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-
-<div align="middle">
-  <table style="width=100%">
-    <tr>
-      <td>
-        <img src="images/image1.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-      <td>
-        <img src="images/image2.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-    </tr>
-    <br>
-    <tr>
-      <td>
-        <img src="images/image3.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-      <td>
-        <img src="images/image4.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-    </tr>
-  </table>
-</div> -->
-
-
 <p>We will start with the unoptimized naive implementation.</p>
 <p>Because computers save data in a pixel world, which is typically made of rows and columns, it is the most convenient for us to determine what the shape and size and location of the triangle we are attempting to rasterize is. We will start from the lowest pixel in the x-axis and the y-axis, to the highest, by determining the boundary with <b>min(x0, x1, x2)</b>, <b>max(y0, y1, y2)</b> etc.</p>
 <p>Also, because I want the center of the pixel instead of the bottom left, we will floor the point, and add 0.5 to it. Every iteration, we will move the pixel by one. In this process, we will determine whether the point we are rasterizing is in the triangle by using the line test formula in the class.</p>
@@ -129,7 +100,11 @@
   <table style="width=100%">
     <tr>
       <td>
-        <img src="images/task2-4.png" align="middle" width="1000px"/>
+        <img src="images/task2-1.png" align="middle" width="400px"/>
+        <figcaption align="middle">Grid-based Supersamlping Rate 1</figcaption>
+      </td>
+      <td>
+        <img src="images/task2-4.png" align="middle" width="400px"/>
         <figcaption align="middle">Jittered Supersamlping Rate 1</figcaption>
       </td>
     </tr>
@@ -137,13 +112,38 @@
 </div>
 <p>We implemented jittered sampling, which instead of sampling at the subpixel’s center—-what we did in grid-based sampling—-we sample at a random point in the subpixels. This achieves a result that the margins are more “coarse”, and is not that smooth compared to the grid-based result.</p>
 <h3 align="middle">Part 3: Transforms</h3>
-
-
-
-<h2 align="middle">Section II: Sampling</h2>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/task3-1.png" align="middle" width="400px"/>
+        <figcaption align="middle">"Soccer" Game</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p>Here is our version of modified robot.svg, who is playing a soccer game, but the soccer ball is his/her head.</p>
+<p>The left (from the screen’s point of view) arm is just a counterclockwise rotation of 80 degrees.</p>
+<p>Then I made the left leg and right arm using similar techniques, which is rotation and then translate the lower arm/leg. The translation of lower arm/leg is to make it more natural, as if they were attached to the upper part. And the head was just a translation from the original location.</p>
+<p>I could have changed the color of the robot, but that does not make it feel like these parts are on the same robot, and is just because of an aesthetic purpose.</p>
 
 <h3 align="middle">Part 4: Barycentric coordinates</h3>
-
+<p></p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/task4-1.png" align="middle" width="400px"/>
+        <figcaption align="middle">Test 7</figcaption>
+      </td>
+      <td>
+        <img src="images/task4-2.png" align="middle" width="400px"/>
+        <figcaption align="middle">Demostrating Triangle</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p></p>
 
 <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
 <p>Our solution to task 5 is based on task 2’s solution. After we tested that a point is inside the triangle, we calculate the point’s relative position inside this triangle using the barycentric formula. The relative distance from this point to the three vertices will be the weights for the three vertices’ results of the texture, sicne we know the texture's triangle vertices.</p>
