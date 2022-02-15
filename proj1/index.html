@@ -31,7 +31,7 @@
 
 <div>
 
-<h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
+<h2 align="middle">Part 1: Rasterizing single-color triangles</h2>
 
 <p>We will start with the unoptimized naive implementation.</p>
 <p>Because computers save data in a pixel world, which is typically made of rows and columns, it is the most convenient for us to determine what the shape and size and location of the triangle we are attempting to rasterize is. We will start from the lowest pixel in the x-axis and the y-axis, to the highest, by determining the boundary with <b>min(x0, x1, x2)</b>, <b>max(y0, y1, y2)</b> etc.</p>
@@ -65,7 +65,7 @@
     </tr>
   </table>
 </div>
-<h3 align="middle">Part 2: Antialiasing triangles</h3>
+<h2 align="middle">Part 2: Antialiasing triangles</h2>
 
 
 <p>Supersampling is useful because we want to get rid of the jigsaws resulting from low sample rate (pixel is always too low for continuous non-horizontal and non-vertical lines).</p>
@@ -93,7 +93,6 @@
   </table>
 </div>
 <p>In lower supersampling rate, the tip of this triangle is too skinny for a pixel, so that the in-triangle test may simply fail. But higher supersampling rate allows testing more points in more equally distributed points in the pixel, and found that not all the points are outside of the triangle. Then it becomes a shallow pink. From the macro view, the triangle is now connected at 16 sample_rate, in contrast to the disconnected parts at 1 sample_rate.</p>
-<p>We will start with the unoptimized naive implementation.</p>
 
 
 <div align="middle">
@@ -111,7 +110,7 @@
   </table>
 </div>
 <p>We implemented jittered sampling, which instead of sampling at the subpixel’s center—-what we did in grid-based sampling—-we sample at a random point in the subpixels. This achieves a result that the margins are more “coarse”, and is not that smooth compared to the grid-based result.</p>
-<h3 align="middle">Part 3: Transforms</h3>
+<h2 align="middle">Part 3: Transforms</h2>
 <div align="middle">
   <table style="width=100%">
     <tr>
@@ -127,7 +126,7 @@
 <p>Then I made the left leg and right arm using similar techniques, which is rotation and then translate the lower arm/leg. The translation of lower arm/leg is to make it more natural, as if they were attached to the upper part. And the head was just a translation from the original location.</p>
 <p>I could have changed the color of the robot, but that does not make it feel like these parts are on the same robot, and is just because of an aesthetic purpose.</p>
 
-<h3 align="middle">Part 4: Barycentric coordinates</h3>
+<h2 align="middle">Part 4: Barycentric coordinates</h2>
 <p></p>
 <div align="middle">
   <table style="width=100%">
@@ -145,7 +144,7 @@
 </div>
 <p></p>
 
-<h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
+<h2 align="middle">Part 5: "Pixel sampling" for texture mapping</h2>
 <p>Our solution to task 5 is based on task 2’s solution. After we tested that a point is inside the triangle, we calculate the point’s relative position inside this triangle using the barycentric formula. The relative distance from this point to the three vertices will be the weights for the three vertices’ results of the texture, sicne we know the texture's triangle vertices.</p>
 <p>Now the resulting <b>p_uv</b> is a Vertex2D with two points from 0 to 1. The nearest point sampling will round the two points to the nearest integrals. This will get the nearest texel in the texture.</p>
 <p>The bilinear sampling is more complex. We basically will sample the 4 surrounding texels, then use lerp and other techniques taught in the lecture to weight the results from these 4 texels according to their distances to the sampling point.</p>
@@ -178,7 +177,7 @@
 </div>
 <p>Both sampling techniques achieve smoother pixels at 16 sample_rate compared to their 1 sample_rate result. But the nearest sampling is too “sharp” at 1 sample_rate so that lines are seemingly disconnected. Bilinear sampling’s lines are way more smoother even at 1 sample_rate, as if supersampled. Even at 16 sample_rate, nearest sampling is still sharp compared to bilinear sampling, and shows more small jigsaws (though not very obvious since we supersampled).</p>
 <p>When we have non-vertical and non-horizontal lines, or, more generally, when a point is smaller than a pixel can sample well, bilinear sampling will achieve better results since it is a weighted average of 4 surrounding pixels. Nearest sampling may simply ignore these texels, which may be useful, if they are not the nearest one.</p>
-<h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
+<h2 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h2>
 <p>Because using only the full-resolution texture, which is what we did in task 5, we may get a picture with moiré or jigsaws resulting from a low sample rate. Low sample rate, or low screen resolution in the texture area does not require a too high texture resolution, so we just need to use a low resolution texture.</p>
 <p>Our textures are saved in a mipmap format so that we can easily access different levels of resolution of the textures. When a texture subspace is mapped to a big screen subspace, we need to use a high resolution texture, and if mapped to a small screen subspace, we use low resolution to reduce sampling artifacts.</p>
 <p>In our implementation, every pixel (or subpixel) (x, y) is calculated its required level of mipmap when we rasterize a triangle. By also computing (x + 1,y), (x, y + 1) pixels’ barycentric results, we can estimate d (u or v) / d (x or y), where u and v are the corresponding axis in the texture space.</p>
@@ -200,8 +199,23 @@
   <table style="width=100%">
     <tr>
       <td>
-        <img src="images/task6-1.png" align="middle" width="1000px"/>
-        <figcaption align="middle">Empty</figcaption>
+        <img src="images/task6-2.png" align="middle" width="400px"/>
+        <figcaption align="middle">Level 0, Nearest Pixel</figcaption>
+      </td>
+      <td>
+        <img src="images/task6-3.png" align="middle" width="400px"/>
+        <figcaption align="middle">Level 0, Bilinear Pixel</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="images/task6-4.png" align="middle" width="400px"/>
+        <figcaption align="middle">Nearest Level, Nearest Pixel</figcaption>
+      </td>
+      <td>
+        <img src="images/task6-5.png" align="middle" width="400px"/>
+        <figcaption align="middle">Nearest Level, Bilinear Pixel</figcaption>
       </td>
     </tr>
   </table>
