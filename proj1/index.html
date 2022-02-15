@@ -31,11 +31,6 @@
 
 <div>
 
-<h2 align="middle">Overview</h2>
-<p>Give a high-level overview of what you implemented in this project. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the project.</p>
-
-<h2 align="middle">Section I: Rasterization</h2>
-
 <h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
 
 <!-- <p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
@@ -152,7 +147,7 @@
 
 <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
 <p>Our solution to task 5 is based on task 2’s solution. After we tested that a point is inside the triangle, we calculate the point’s relative position inside this triangle using the barycentric formula. The relative distance from this point to the three vertices will be the weights for the three vertices’ results of the texture, sicne we know the texture's triangle vertices.</p>
-<p>Now the resulting <b>p_uv</p> is a Vertex2D with two points from 0 to 1. The nearest point sampling will round the two points to the nearest integrals. This will get the nearest texel in the texture.</p>
+<p>Now the resulting <b>p_uv</b> is a Vertex2D with two points from 0 to 1. The nearest point sampling will round the two points to the nearest integrals. This will get the nearest texel in the texture.</p>
 <p>The bilinear sampling is more complex. We basically will sample the 4 surrounding texels, then use lerp and other techniques taught in the lecture to weight the results from these 4 texels according to their distances to the sampling point.</p>
 
 
@@ -184,13 +179,40 @@
 <p>Both sampling techniques achieve smoother pixels at 16 sample_rate compared to their 1 sample_rate result. But the nearest sampling is too “sharp” at 1 sample_rate so that lines are seemingly disconnected. Bilinear sampling’s lines are way more smoother even at 1 sample_rate, as if supersampled. Even at 16 sample_rate, nearest sampling is still sharp compared to bilinear sampling, and shows more small jigsaws (though not very obvious since we supersampled).</p>
 <p>When we have non-vertical and non-horizontal lines, or, more generally, when a point is smaller than a pixel can sample well, bilinear sampling will achieve better results since it is a weighted average of 4 surrounding pixels. Nearest sampling may simply ignore these texels, which may be useful, if they are not the nearest one.</p>
 <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
+<p>Because using only the full-resolution texture, which is what we did in task 5, we may get a picture with moiré or jigsaws resulting from a low sample rate. Low sample rate, or low screen resolution in the texture area does not require a too high texture resolution, so we just need to use a low resolution texture.</p>
+<p>Our textures are saved in a mipmap format so that we can easily access different levels of resolution of the textures. When a texture subspace is mapped to a big screen subspace, we need to use a high resolution texture, and if mapped to a small screen subspace, we use low resolution to reduce sampling artifacts.</p>
+<p>In our implementation, every pixel (or subpixel) (x, y) is calculated its required level of mipmap when we rasterize a triangle. By also computing (x + 1,y), (x, y + 1) pixels’ barycentric results, we can estimate d (u or v) / d (x or y), where u and v are the corresponding axis in the texture space.</p>
 
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/task6-1.png" align="middle" width="1000px"/>
+        <figcaption align="middle">Method to Get Mipmap Level</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 
+<p>After calculating the level D, which is a floating point number, we can determine how to use the levels of mipmaps. Nearest level sampling will simply choose the closest ingeral to be the result. But bilinear level sampling will be the weighted average of the two neighboring levels (the lerp formula).</p>
 
-<h2 align="middle">Section III: Art Competition</h2>
-<p>If you are not participating in the optional art competition, don't worry about this section!</p>
-
-<h3 align="middle">Part 7: Draw something interesting!</h3>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/task6-1.png" align="middle" width="1000px"/>
+        <figcaption align="middle">Empty</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p>Multiple samples per (screen) pixel, or supersampling, is the only one that requires significantly more memory, because every sample must be saved in an individual memory space in the sample buffer. Computation complexity grows linearly with the sample rate.</p>
+<p>But bilinear pixel sampling requires constantly 3 more memory access (4 including the unavoidable access that is also in nearest pixel sampling), which is way cheaper than supersampling because 4 is a constant, and pixel sampling is at a lower level that supersampling must also include.</p>
+<p>Level sampling techniques also include the calculation of level, and weighing the results from distinct levels, whose introduction leads to even longer computation time, and is slower than pixel sampling since it is at a higher level. Level sampling also requires 4/3 memory usage.</p>
+<p>Choosing higher sample rate instead of lower, bilinear pixel sampling instead of nearest, bilinear level sampling instead of nearest or zero, can achieve better antialiasing effects.</p>
+<p>In terms of the antialiasing power, supersampling is the most powerful, because sampling more pixels is like solving problems using brute force. We want to use pixel sampling and level sampling techniques to mimic the effects of supersampling, instead of replacing it.</p>
+<p>Level sampling is the next effective, since it can greatly reduce artifacts resulting from far objects with high resolution texture.</p>
+<p>Pixel sampling is the cheapest one, but can provide an effect similar to that of supersampling.</p>
 
 </body>
 </html>
