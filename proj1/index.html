@@ -127,7 +127,7 @@
 <p>I could have changed the color of the robot, but that does not make it feel like these parts are on the same robot, and is just because of an aesthetic purpose.</p>
 
 <h2 align="middle">Part 4: Barycentric coordinates</h2>
-<p></p>
+<p>Barycentric coordinates are used to describe the relative position of a point within a triangle. By using the math taught in lecture, we will be able to calculate alpha, beta, gamma, where their sum is 1. Alpha, beta, gamma’s proportion is also equal to the proportion of the distance from the sampling point to A, B, C.</p>
 <div align="middle">
   <table style="width=100%">
     <tr>
@@ -142,7 +142,7 @@
     </tr>
   </table>
 </div>
-<p></p>
+<p>By using this technique, we can calculate the weighted average of values from the three vertices. For example, we make a triangle with one pure R vertex, one pure G vertex, and one pure B vertex. The space between these points should include every possible RGB value combination, smoothly transitioning.</p>
 
 <h2 align="middle">Part 5: "Pixel sampling" for texture mapping</h2>
 <p>Our solution to task 5 is based on task 2’s solution. After we tested that a point is inside the triangle, we calculate the point’s relative position inside this triangle using the barycentric formula. The relative distance from this point to the three vertices will be the weights for the three vertices’ results of the texture, sicne we know the texture's triangle vertices.</p>
