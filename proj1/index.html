@@ -151,8 +151,42 @@
 
 
 <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
+<p>Our solution to task 5 is based on task 2’s solution. After we tested that a point is inside the triangle, we calculate the point’s relative position inside this triangle using the barycentric formula. The relative distance from this point to the three vertices will be the weights for the three vertices’ results of the texture.</p>
+<p>Now the resulting <b>p_uv</p> is a Vertex2D with two points from 0 to 1. The nearest point sampling will round the two points to the nearest integrals. This will get the nearest texel in the texture.</p>
+<p>The bilinear sampling is more complex. We basically will sample the 4 surrounding texels, then use lerp and other techniques taught in the lecture to weight the results from these 4 texels according to their distances to the sampling point.</p>
 
 
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/task5-1.png" align="middle" width="400px"/>
+        <figcaption align="middle">Nearest Sampling, Rate 1</figcaption>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="images/task5-2.png" align="middle" width="400px"/>
+        <figcaption align="middle">Nearest Sampling, Rate 16</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="images/task5-3.png" align="middle" width="400px"/>
+        <figcaption align="middle">Bilinear Sampling, Rate 1</figcaption>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="images/task5-4.png" align="middle" width="400px"/>
+        <figcaption align="middle">Bilinear Sampling, Rate 16</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<p>Both sampling techniques achieve smoother pixels at 16 sample_rate compared to their 1 sample_rate result. But the nearest sampling is too “sharp” at 1 sample_rate so that lines are seemingly disconnected. Bilinear sampling’s lines are way more smoother even at 1 sample_rate, as if supersampled. Even at 16 sample_rate, nearest sampling is still sharp compared to bilinear sampling, and shows more small jigsaws (though not very obvious since we supersampled).</p>
+<p>When we have non-vertical and non-horizontal lines, or, more generally, when a point is smaller than a pixel can sample well, bilinear sampling will achieve better results since it is a weighted average of 4 surrounding pixels. Nearest sampling may simply ignore these texels, which may be useful, if they are not the nearest one.</p>
 <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
 
 
