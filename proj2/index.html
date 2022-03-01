@@ -1,7 +1,213 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+  <style>
+    body {
+      padding: 100px;
+      width: 1000px;
+      margin: auto;
+      text-align: left;
+      font-weight: 300;
+      font-family: 'Open Sans', sans-serif;
+      color: #121212;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+  </style>
+  <title>CS 184 Mesh Editor</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+  <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+  <h1 align="middle">Project 2: Mesh Editor</h1>
+  <h2 align="middle">Rui Wang, Zhuowen Chen, CS184-PNPThisClass</h2>
+
+  <br><br>
+
+  <div>
+
+    <h2 align="middle">Overview</h2>
+    <p>TODO: Give a high-level overview of what you implemented in this project. Think about what you've built as a whole.
+      Share your thoughts on what interesting things you've learned from completing the project.</p>
+
+    <h2 align="middle">Section I: Bézier Curves and Surfaces</h2>
+
+    <h3 align="middle">Part 1: Bézier curves with 1D de Casteljau subdivision</h3>
+    
+    <p>The de Casteljau’s algorithm is an algorithm to numerically estimate the real, continuous Bézier curve. Say we have several points, we will connect every consecutive point (in terms of predetermined order, instead of Euclidean distance), and we have a parameter t. At every level, we lerp at every source line segments with the parameter t, creating n - 1 new points (where n is num of points in this level), and we connect these new points in the same way to create source line segments for the next level. Every next level does the same thing with source line segments created by the last level only. Eventually we will have only one point remaining, and this point will be the Bézier curve’s point with this parameter t.</p>
+    <p>We will go through every parameter t so that on the screen’s pixel level, it looks as if they are continuous. And this creates the “entire” Bézier curve.</p>
+    <p>In this part 1, we only need to implement the evaluateStep method, which does one level’s job mentioned above.</p>
+
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/1_1.png" align="middle" width="400px" />
+            <figcaption align="middle">Step 0</figcaption>
+          </td>
+          <td>
+            <img src="images/1_2.png" align="middle" width="400px" />
+            <figcaption align="middle">Step 1</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/1_3.png" align="middle" width="400px" />
+            <figcaption align="middle">Step 2</figcaption>
+          </td>
+          <td>
+            <img src="images/1_4.png" align="middle" width="400px" />
+            <figcaption align="middle">Step 3</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/1_5.png" align="middle" width="400px" />
+            <figcaption align="middle">Step 4</figcaption>
+          </td>
+          <td>
+            <img src="images/1_6.png" align="middle" width="400px" />
+            <figcaption align="middle">Final Step And Complete Bézier Curve</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p>Slightly modified curve and parameter t</p>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/2_1.png" align="middle" width="400px" />
+            <figcaption align="middle">Step 0</figcaption>
+          </td>
+          <td>
+            <img src="images/2_2.png" align="middle" width="400px" />
+            <figcaption align="middle">Step 1</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/2_3.png" align="middle" width="400px" />
+            <figcaption align="middle">Step 2</figcaption>
+          </td>
+          <td>
+            <img src="images/2_4.png" align="middle" width="400px" />
+            <figcaption align="middle">Step 3</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/2_5.png" align="middle" width="400px" />
+            <figcaption align="middle">Step 4</figcaption>
+          </td>
+          <td>
+            <img src="images/2_6.png" align="middle" width="400px" />
+            <figcaption align="middle">Final Step And Complete Bézier Curve</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p>Animation showing the effect of changing parameter t</p>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/CS_184_A_2_1_3.gif" align="middle" width="800px" />
+          </td>
+        </tr>
+      </table>
+    </div>
+
+
+    <h3 align="middle">Part 2: Bézier surfaces with separable 1D de Casteljau subdivision</h3>
+    <p>In order to extend the concept of Bézier curve to Bézier surface, we will group the points in the space into several Bézier curve’s source points. Given a parameter u, we evaluate the corresponding result points for each group. These resulting points can be evaluated their Bézier curve’s resulting point at a given parameter v. Therefore, we have achieved a resulting point at (u, v), and when enough u’s and v’s are given, these points form a surface.</p>
+    <p>In our implementation, we essentially did the first part, which is the parameter u’s part in method evaluate1D, calling the step methods in part 1. Then we will evaluate1D again for the resulting points in the first part.</p>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/2_7.png" align="middle" width="800px" />
+            <figcaption align="middle">Teapot Bézier Surface</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <h2 align="middle">Section II: Sampling</h2>
+
+    <h3 align="middle">Part 3: Average normals for half-edge meshes</h3>
+    <p>In our implementation, we basically used the do-while loop to loop through every triangle that the provided vertex is part of. For every triangle, we calculated the area, and called normal() for this face to get the normalized normal vector. We multiply it by the area to get the unnormalized one, and added it to a resulting vector N. After we looped through every triangle, the normal vector for this vertex will be the resulting vector N, divided by the total area of these triangles.</p>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/3_1.png" align="middle" width="800px" />
+            <figcaption align="middle">Mesh Version Of The Teapot</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+
+    <h3 align="middle">Part 4: Half-edge flip</h3>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/4_1.png" align="middle" width="800px" />
+            <figcaption align="middle">Diagram Used In Our Implementation</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <p>The exact same logic in the provided simple mesh diagram was used to implement the flipEdge method. We basically went through every half edge, getting every vertex, halfedge, edge and face, and then set up their values to the new values in the right diagram. For example, the half edge for vertex c was changed to one half edge on the ca edge. We did not discard existing variables in this method. For example, Instead of creating a new edge ab, we reused bc for the new mesh, since we also reused the two halfedges on it but just set up new values for their vertex, next, etc.</p>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/4_2.png" align="middle" width="800px" />
+            <figcaption align="middle">Teapot With Some Flipped Edges</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <p>We flipped some selected edges (fourth rectangle from the left on the teapot's body).</p>
+    <p>Our implementation for this method was so successful that even the first prototype can successfully flip edges, so we did not debug this method.</p>
+
+    <h3 align="middle">Part 5: Half-edge split</h3>
+
+
+    <h3 align="middle">Part 6: Loop subdivision for mesh upsampling</h3>
+
+
+
+    <h2 align="middle">Section III: Optional Extra Credit</h2>
+    <p>If you are not participating in the optional mesh competition, don't worry about this section!</p>
+
+    <h3 align="middle">Part 7: Design your own mesh!</h3>
+
+</body>
+
 </html>
