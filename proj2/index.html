@@ -198,15 +198,223 @@
 
     <h3 align="middle">Part 5: Half-edge split</h3>
 
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/5_1.png" align="middle" width="800px" />
+            <figcaption align="middle">Diagram From Spec</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <p>We use the exact same logic in the provided simple mesh diagram to implement the splitEdge method.
+      First we get every halfedge, edge, vertex, and faces. Then, we calculate the mid point coordinate of
+      the splitted edge and create a new vertex with position set to it. Then, we assign the pointers of
+      each new mesh element generted due to the split of the edge. Also, for the purpose of supporting
+      TASK 6, we make the edges a_m, d_m and vertex m to be new (isNew = true).<br> The programming part
+      is a little bit demanding as we have to set every pointers correctly for each mesh element. 
+      We had several typos which ended up cost us some time to find out.
+    </p>
+
+    <p>Below is a comparison of the <b>teapot</b> before (left) and after (right) edge splits: </p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/5_2a.png" align="middle" width="400px" />
+            <figcaption align="middle">Before Edge Split</figcaption>
+          </td>
+          <td>
+            <img src="images/5_2b.png" align="middle" width="400px" />
+            <figcaption align="middle">After Edge Split</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p>Below is a comparison of the <b>teapot</b> before (left) and after (right) a 
+      combination of both edge splits and edge flips: </p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/5_2a.png" align="middle" width="400px" />
+            <figcaption align="middle">Before Edge Split and Flip</figcaption>
+          </td>
+          <td>
+            <img src="images/5_2c.png" align="middle" width="400px" />
+            <figcaption align="middle">After Edge Split and Flip</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p>We also implemented the extra credit. At first we tried to modify the function in a way such that
+      the common works are completed before we check if the given edge is in boundary and directly return
+      the created vertex at that point. However, some small but important problems occured and we just 
+      use the control flow to divide the whole function into two parts. Below is a comparison of 
+      the <b>beetle</b> before (left) and after (right) edge split on a boundary edge:
+    </p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/5_3a.png" align="middle" width="400px" />
+            <figcaption align="middle">Before Edge Split</figcaption>
+          </td>
+          <td>
+            <img src="images/5_3b.png" align="middle" width="400px" />
+            <figcaption align="middle">After Edge Split</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
 
     <h3 align="middle">Part 6: Loop subdivision for mesh upsampling</h3>
+    <p>To implement the loop subdivision, we strictly followed the steps described to us in the spec 
+      and the annotation of the upsample function. They make this task much easier. <b>First</b>, we compute 
+      and store the new position of each vertex. <b>Secondly</b>, we compute and store the position for 
+      new vertices (split point) on each edge. Along the first two steps, we mark each traversed vertex 
+      and edge to be old, and the computing formulas are given in the spec and lectures. <b>Thirdly</b>, 
+      we split each edge, and store the new position of the corresponding newly created vertex 
+      into the vertex (previously in the splitted edge). <b>Forthly</b>, we flip each edge. 
+      <b>Finally</b>, we update the position of each vertex to be its new position.
+    </p>
 
+    <p>After loop subdivision, the sharp corners and edges become relatively smoother. This effect can 
+      be reduced by splitting edges near the sharp corners and edges.
+    </p>
+    <p>Below is a comparison of <b>teapot</b> before (left) and after (right) loop subdivision:</p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/6_1.png" align="middle" width="400px" />
+            <figcaption align="middle">Before Loop Subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/6_2.png" align="middle" width="400px" />
+            <figcaption align="middle">After Loop Subdivision</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
 
+    <p>Below is a comparison of rendered <b>cube.dae</b> with 0 (left), 1 (middle) and 2(right) 
+      iterations of loop subdivision:
+    </p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/6_3a.png" align="middle" width="266px" />
+            <figcaption align="middle">0 Iteration of Loop Subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/6_3b.png" align="middle" width="266px" />
+            <figcaption align="middle">1 Iteration of Loop Subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/6_3c.png" align="middle" width="266px" />
+            <figcaption align="middle">2 Iterations of Loop Subdivision</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p>We can see that after repeated subdivisions, the cube becomes slightly asymmetric.</p>
+    <p>We can pre-process the cube to make the cube subdivides symmetrically by splitting the 
+      diagonal of each face of the cube before doing loop subdivision. Below is a comparison of 
+      rendered <b>cube.dae</b> with 0 (left), 1 (middle) and 2(right) iterations of loop subdivision
+      with pre-process:
+    </p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/6_4a.png" align="middle" width="266px" />
+            <figcaption align="middle">0 Iteration of Loop Subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/6_4b.png" align="middle" width="266px" />
+            <figcaption align="middle">1 Iteration of Loop Subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/6_4c.png" align="middle" width="266px" />
+            <figcaption align="middle">2 Iterations of Loop Subdivision</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p>We also implemented the extra credit extension of supporting loop subdivision for meshes with boundary,
+      we changed the position-updating formula according to the formula given in the lecture slides:
+    </p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/6_5.png" align="middle" width="800px" />
+            <figcaption align="middle">Boundary Update Explained</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <p>Below is a comparison of the <b>beetle</b> before (left) and after (right) loop subdivision:</p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/6_6a.png" align="middle" width="400px" />
+            <figcaption align="middle">Before Loop Subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/6_6b.png" align="middle" width="400px" />
+            <figcaption align="middle">After Loop Subdivision</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
 
     <h2 align="middle">Section III: Optional Extra Credit</h2>
-    <p>If you are not participating in the optional mesh competition, don't worry about this section!</p>
 
     <h3 align="middle">Part 7: Design your own mesh!</h3>
+    <p>Beyond the simple humanoid mesh described in the tutorial, we made the elbow-like and hand-like 
+      structures for the arms, horns in the head, and make the arms raised up.
+    </p>
+
+    <p>Below is a series of screenshots showing the original mesh (left) and the mesh after one (middle) 
+      and two (right) rounds of subdivision: </p>
+      <div align="middle">
+        <table style="width=100%">
+          <tr>
+            <td>
+              <img src="images/7_1a.png" align="middle" width="800px" />
+              <figcaption align="middle">Original Mesh</figcaption>
+            </td>
+          </tr>
+          <br>
+          <tr>
+            <td>
+              <img src="images/7_1b.png" align="middle" width="800px" />
+              <figcaption align="middle">After 1 round of subdivision</figcaption>
+            </td>
+          </tr>
+          <br>
+          <tr>
+            <td>
+              <img src="images/7_1c.png" align="middle" width="800px" />
+              <figcaption align="middle">After 2 rounds of subdivision</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>Link to the webpage:</h2>
+      <a href="https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj2/index.html">
+        https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj2/index.html
+      </a>
 
 </body>
 
