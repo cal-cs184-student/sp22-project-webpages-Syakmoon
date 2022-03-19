@@ -1,0 +1,9 @@
+command: -r 800 600
+
+cow.dae without part3: 51.2285s
+banana.dae without part3: 22.6702s
+maxplanck.dae without part3: 883.1857s
+
+cow.dae with part3: 0.2177s
+banana.dae with part3: 0.1594s
+maxplanck.dae with part3: 0.3137s
