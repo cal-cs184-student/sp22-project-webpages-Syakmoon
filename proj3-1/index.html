@@ -14643,7 +14643,7 @@ vector as <b>{ x_camera, y_camera, -1 }</b>, then we use <b>c2w * dire_camera</b
 the camera position, which is in world space, and its direction is the <b>dire_world</b> vector that we
 just got. Finally, we set the <b>min_t</b> and <b>max_t</b> attributes of the ray to be <b>nclip</b> and
 <b>fclip</b> respectively.<br><br></p>
-<p>For primitive intersections, we calculate t and see if it lies within the interval $[r.min_t, r.max_t]$. If it is not, we take it as no intersection (invalid), otherwise we take it as a valid intersection, and set r.max_t to be the intersected t. If given an <b>Intersection</b> structure, we update its attributes.<br><br></p>
+<p>For primitive intersections, we calculate t and see if it lies within the interval $[r.min\_ t, r.max\_ t]$. If it is not, we take it as no intersection (invalid), otherwise we take it as a valid intersection, and set r.max_t to be the intersected t. If given an <b>Intersection</b> structure, we update its attributes.<br><br></p>
 <p>To get the ray intersection with <b>sphere</b>, we solve the equation</p>
 $$(o+td-c)^2 - R^2 = 0 $$<p></p>
 <p>Here, 
