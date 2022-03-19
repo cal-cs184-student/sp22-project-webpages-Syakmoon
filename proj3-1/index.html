@@ -14844,7 +14844,8 @@ When running the tests, I used parameters "-r 800 600" and my CPU is Intel Core 
                 </ol>
         </li>
         <li>
-            <b>estimate_direct_lighting_importance</b>:
+            <b>estimate_direct_lighting_importance</b>:Basically very similar to estimate_direct_lighting_hemisphere. In our implementation, we make another for loop through every light in scene. Then, we sample every light as num_samples times (if the light is delta light, this is 1, otherwise ns_area_light)
+            Every iteration we sample a light, we call sample_L on the hit_p, which is given in skeleton code. It gives the incoming light wi, the distance to the light distToLight, and a pdf. It also returns the radiance rad. We then setup a temporary ray temp_r, with origin point as hit_p, direction as wi, and max_t as distToLight - EPS_F. In order for floating point to work, we also would set min_t to EPS_F. If this light intersect with the bounding volume bvh, or the costheta of this ray with this object is negative (behind the surface), we do not consider this sample and will continue the loop. Costheta can be easily calculated with (w2o * wi).z, since after going into the object’s point of view, the costheta is simply the z value of the light / the light’s length, and because light’s length is normalized, this is simply the z value. This is slightly faster than doing dot product of the isect.n and normalized wi. Our “fr” for this function is isect.bsdf->f(w_out, wi), and “Li” is rad, which is returned by sample_L above. For this light, every considered sample will be accumulated with fr * Li * costheta / pdf, and after all sampling for this light has done, the L_out will be incremented by that number (accumulated sample) / num_samples. After every light is sampled, we return L_out.
         </li>
     </ul>
 </div>
@@ -14895,30 +14896,30 @@ When running the tests, I used parameters "-r 800 600" and my CPU is Intel Core 
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><b>Thirdly</b>, we focus on one particular scene with at least one area light and compare the noise levels in soft shadows when rendering with 1, 4, 16, and 64 light rays (the -l flag) and with 1 sample per pixel (the -s flag) using light sampling, not uniform hemisphere sampling. We used <b>CBbunny.dae</b>:</p>
 <div align="middle">
-      <table style="width=100%">
-        <tr>
-          <td>
-            <img src="img/part3_bunny_1_1.png" align="middle" width="400px" />
-            <figcaption align="middle">CBbunny.dae, 1 light rays</figcaption>
-          </td>
-          <td>
-            <img src="img/part3_bunny_1_4.png" align="middle" width="400px" />
-            <figcaption align="middle">CBbunny.dae, 4 light rays</figcaption>
-          </td>
-        </tr>
-        <br>
-        <tr>
-          <td>
-            <img src="img/part3_bunny_1_16.png" align="middle" width="400px" />
-            <figcaption align="middle">CBbunny.dae, 16 light rays</figcaption>
-          </td>
-          <td>
-            <img src="img/part3_bunny_1_64.png" align="middle" width="400px" />
-            <figcaption align="middle">CBbunny.dae, 64 light rays</figcaption>
-          </td>
-        </tr>
-      </table>
-    </div>
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="img/part3_bunny_1_1.png" align="middle" width="400px" />
+          <figcaption align="middle">CBbunny.dae, 1 light rays</figcaption>
+        </td>
+        <td>
+          <img src="img/part3_bunny_1_4.png" align="middle" width="400px" />
+          <figcaption align="middle">CBbunny.dae, 4 light rays</figcaption>
+        </td>
+      </tr>
+      <br>
+      <tr>
+        <td>
+          <img src="img/part3_bunny_1_16.png" align="middle" width="400px" />
+          <figcaption align="middle">CBbunny.dae, 16 light rays</figcaption>
+        </td>
+        <td>
+          <img src="img/part3_bunny_1_64.png" align="middle" width="400px" />
+          <figcaption align="middle">CBbunny.dae, 64 light rays</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>
 </div>
 </div>
@@ -14931,6 +14932,282 @@ When running the tests, I used parameters "-r 800 600" and my CPU is Intel Core 
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><b>Finally</b>, we compare the results between uniform hemisphere sampling and lighting sampling in a one-paragraph analysis:<br>
 By comparing the graphs of the same dae file rendered with same resolution and same light rays per pixel sample (i.e. same parameters given when rendering), we can see that the uniform hemisphere sampling gives much more noise than the importance lighting sampling method gives overall, but it seems that the shadow of object rendered with importance sampling is more shattered.</p>
+
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 align="middle">Part 4: Global Illumination</h2>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>In our implementation of the indirect lighting function, we will only be continuing if we find that coin flip on the continuation probability (which is 1 - Russian Roulette Probability) is true, and that the ray’s depth has not passed the limit. Then we evaluate diffuse lambertian BSDF using sample_f, which returns the evaluation of the BSDF at (wo, <em>wi), based on the sample given pdf. Once we find that the ray from o2w </em> wi can intersect with the bvh, we will be tracing the new ray to the next path with recursion. The answer that will be returned will be calculated using one_bounce + result_recursion * costheta / pdf / continuation_prob. In the cases of not intersecting or not continuing, it will just return the result of one_bounce.</p>
+
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Below are two pseudocode from the lecture that explains what we do in our implementation. They are not exactly the same, but rather similar.</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="img/4-1.png" align="middle" width="480px" />
+      </td>
+      <td>
+        <img src="img/4-2.png" align="middle" width="480px" />
+      </td>
+    </tr>
+  </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>We would also like to show some images rendered with global illumination.</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="img/4-3.png" align="middle" width="480px" />
+      </td>
+      <td>
+        <img src="img/4-4.png" align="middle" width="480px" />
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="img/4-5.png" align="middle" width="480px" />
+      </td>
+    </tr>
+  </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Here are images showing direct and indirect illumination. We turned off zero bounce here for indirect illumination, so it will not show the light source.</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="img/4-6.png" align="middle" width="480px" />
+        <figcaption align="middle">Direct</figcaption>
+      </td>
+      <td>
+        <img src="img/4-7.png" align="middle" width="480px" />
+        <figcaption align="middle">Indirect</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Below are some images of different max_ray_depth:</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="img/4-8.png" align="middle" width="480px" />
+        <figcaption align="middle">m = 0</figcaption>
+      </td>
+      <td>
+        <img src="img/4-9.png" align="middle" width="480px" />
+        <figcaption align="middle">m = 1</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="img/4-10.png" align="middle" width="480px" />
+        <figcaption align="middle">m = 2</figcaption>
+      </td>
+      <td>
+        <img src="img/4-11.png" align="middle" width="480px" />
+        <figcaption align="middle">m = 3</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="img/4-12.png" align="middle" width="480px" />
+        <figcaption align="middle">m = 100</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Here are some images of sample-per-pixel rates of 1, 2, 4, 8, 16, 64, and 1024.</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="img/4-13.png" align="middle" width="480px" />
+        <figcaption align="middle">s = 1</figcaption>
+      </td>
+      <td>
+        <img src="img/4-14.png" align="middle" width="480px" />
+        <figcaption align="middle">s = 2</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="img/4-15.png" align="middle" width="480px" />
+        <figcaption align="middle">s = 4</figcaption>
+      </td>
+      <td>
+        <img src="img/4-16.png" align="middle" width="480px" />
+        <figcaption align="middle">s = 8</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="img/4-17.png" align="middle" width="480px" />
+        <figcaption align="middle">s = 16</figcaption>
+      </td>
+      <td>
+        <img src="img/4-18.png" align="middle" width="480px" />
+        <figcaption align="middle">s = 64</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="img/4-19.png" align="middle" width="480px" />
+        <figcaption align="middle">s = 1024</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 align="middle">Part 5: Adaptive Sampling</h2>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>In the loop inside raytrace_pixel that samples num_samples times of a pixel, we keep track of s1, sum of illum of est_radiance_global_illumination() given the generated random ray (which is done in previous parts), and s2, sum of $\text{illum} ^ 2$. When ever samples samplesPerBatch times, it will try to check if it has reach a 95% confidence level that it is okay to exit. It does so by calculating 
+$$\text{mean} = \frac{s_1}{\text{num_samples_so_far}}$$
+$$\text{variance} = \frac{1.0}{\text{num_samples_so_far} - 1} * (s_2 - \frac{s_1^2}{\text{num_samples_so_far}})$$
+And this is okay to exit if 
+$$1.96 * \sqrt{\frac{\text{variance}}{\text{num_samples_so_far}}} \le \text{maxTolerance} * \text{mean}$$
+The cumulative illum is then being averaged by num_samples_so_far, and we record the num_samples_so_far in a proper position in sampleCountBuffer[]. Also record the color in sampleBuffer’s corresponding pixel.</p>
+
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Some images of sample-per-pixel rates of 2048:</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="img/5-1.png" align="middle" width="480px" />
+        <figcaption align="middle">Adaptive sample image</figcaption>
+      </td>
+      <td>
+        <img src="img/5-2.png" align="middle" width="480px" />
+        <figcaption align="middle">Adaptive sample rate</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="img/5-3.png" align="middle" width="480px" />
+        <figcaption align="middle">Adaptive sample image</figcaption>
+      </td>
+      <td>
+        <img src="img/5-4.png" align="middle" width="480px" />
+        <figcaption align="middle">Adaptive sample rate</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><h2>Link to the webpage:</h2>
+<a href="https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj3-1/index.html">
+https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj3-1/index.html
+</a></p>
 
 </div>
 </div>
