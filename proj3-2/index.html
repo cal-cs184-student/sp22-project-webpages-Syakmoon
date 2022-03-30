@@ -93,11 +93,116 @@
 
 
     <h3 align="middle">Part 2: Microfacet Material</h3>
+    <p>Below are images rendered from <b>CBdragon_microfacet_au.dae</b> with alpha set to 0.005, 0.05, 
+    0.25, 0.5:</p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="img/CBdragon_microfacet_au_a0-005.png" align="middle" width="480px" />
+            <figcaption align="middle">alpha = 0.005</figcaption>
+          </td>
+          <td>
+            <img src="img/CBdragon_microfacet_au_a0-05.png" align="middle" width="480px" />
+            <figcaption align="middle">alpha = 0.05</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+			<td>
+				<img src="img/CBdragon_microfacet_au_a0-25.png" align="middle" width="480px" />
+				<figcaption align="middle">alpha = 0.25</figcaption>
+			</td>
+			<td>
+				<img src="img/CBdragon_microfacet_au_a0-5.png" align="middle" width="480px" />
+				<figcaption align="middle">alpha = 0.5</figcaption>
+			</td>
+        </tr>
+      </table>
+    </div>
+    <p>
+      By these images, we can see that when the roughness (alpha value) is set to low values, the 
+      surface of the object is very glossy and has black region. But, as the roughness becomes larger, the surface becomes 
+      increasingly diffuse. When the alpha is 0.5, we actually cannot see black regions on the surface of dragon.
+    </p>
+
+    <p>
+      Below are two images rendered from <b>CBbunny_microfacet_cu.dae</b> using cosine hemisphere sampling
+      and importance sampling:
+    </p>
+
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="img/CBbunny_microfacet_cu_hemi_sample.png" align="middle" width="480px" />
+          <figcaption align="middle">Cosine Hemisphere Sampling</figcaption>
+        </td>
+        <td>
+          <img src="img/CBbunny_microfacet_cu_importance_sample.png" align="middle" width="480px" />
+          <figcaption align="middle">Importance Sampling</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <p>
+    By comparing the two images, we can see that when using cosine hemisphere sampling, the image is 
+    apparently noisier than the image using importance sampling. And with cosine hemisphere sampling, 
+    there are a lot of black spots on the bunny, while the object in the image using importance sampling
+    does not have these black spots. 
+  </p>
+
+  <p>
+    Below is an image rendered with <b>CBdragon_microfacet_ti.dae</b>, This is a dae file in which I 
+    copied everything from <b>CBdragon_microfacet_au.dae</b> but changed <b>eta</b> and <b>k</b> values
+    such that they correspond to material Titanium.
+  </p>
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="img/CBdragon_microfacet_ti_a0-25.png" align="middle" width="960px" />
+          <figcaption align="middle">CBdragon, Titanium</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <p>
+    The <b>eta</b> and <b>k</b> values we used are as follows:
+  </p>
+
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>Wavelength</td>
+        <td>eta</td>
+        <td>k</td>
+      </tr>
+      <tr>
+        <td>614 nm</td>
+        <td>2.6640</td>
+        <td>3.7080</td>
+      </tr>
+      <tr>
+        <td>549 nm</td>
+        <td>2.5400</td>
+        <td>3.4300</td>
+      </tr>
+      <tr>
+        <td>466 nm</td>
+        <td>2.3075</td>
+        <td>3.0850</td>
+      </tr>
+    </table>
+  </div>
+
+
 	<h2>Link to the webpage:</h2>
 	<a href="https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj3-2/index.html">
 	https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj3-2/index.html
 	</a>
-
 </body>
 
 </html>
