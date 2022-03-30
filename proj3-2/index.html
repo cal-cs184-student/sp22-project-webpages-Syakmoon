@@ -1,7 +1,103 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+  <style>
+    body {
+      padding: 100px;
+      width: 1000px;
+      margin: auto;
+      text-align: left;
+      font-weight: 300;
+      font-family: 'Open Sans', sans-serif;
+      color: #121212;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+  </style>
+  <title>CS 184 Mesh Editor</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+  <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+  <h1 align="middle">Project 3-2: Path Tracer</h1>
+  <h2 align="middle">Rui Wang, Zhuowen Chen, CS184-Super-Idol</h2>
+
+  <br><br>
+
+  <div>
+
+    <h3 align="middle">Part 1: Mirror and Glass Materials</h3>
+
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="img/CBspheres_refract_16_4_0.png" align="middle" width="480px" />
+            <figcaption align="middle">Spheres, max_ray_depth = 0</figcaption>
+          </td>
+          <td>
+            <img src="img/CBspheres_refract_16_4_1.png" align="middle" width="480px" />
+            <figcaption align="middle">Spheres, max_ray_depth = 1</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+			<td>
+				<img src="img/CBspheres_refract_16_4_2.png" align="middle" width="480px" />
+				<figcaption align="middle">Spheres, max_ray_depth = 2</figcaption>
+			</td>
+			<td>
+				<img src="img/CBspheres_refract_16_4_3.png" align="middle" width="480px" />
+				<figcaption align="middle">Spheres, max_ray_depth = 3</figcaption>
+			</td>
+        </tr>
+        <br>
+        <tr>
+			<td>
+				<img src="img/CBspheres_refract_16_4_4.png" align="middle" width="480px" />
+				<figcaption align="middle">Spheres, max_ray_depth = 4</figcaption>
+			</td>
+			<td>
+				<img src="img/CBspheres_refract_16_4_5.png" align="middle" width="480px" />
+				<figcaption align="middle">Spheres, max_ray_depth = 5</figcaption>
+			</td>
+        </tr>
+		<br>
+        <tr>
+			<td>
+				<img src="img/CBspheres_refract_16_4_100.png" align="middle" width="480px" />
+				<figcaption align="middle">Spheres, max_ray_depth = 100</figcaption>
+			</td>
+        </tr>
+      </table>
+    </div>
+
+    <p>When max_ray_depth = 0, we can only see the light source, since there is no bounce.</p>
+    <p>When max_ray_depth = 1, we can see the walls reflect the light. Also, the two spheres reflect only the light source. Since there is only one bounce, the spheres can not reflect the walls.</p>
+    <p>When max_ray_depth = 2, we can now see the reflection on the spheres. Since refraction requires light source -> wall -> sphere surface -> sphere’s inside to reach a surface to be seen by the camera, which requires 3 layers, we cannot see the refraction to the walls with max_ray_depth = 2.</p>
+    <p>When max_ray_depth = 3, as what is stated above, we can now see the refraction to the walls. Also, the light source’s rays now can go through the front sphere to be refracted and become a light spot on the ground.</p>
+    <p>When max_ray_depth = 4, with one more depth of ray, we can now also see the refraction of the front sphere in the reflection of the back sphere, since this requires one more bounce. We are now able to see the light spot on the wall, which is rays from the reflection of the back sphere refracted by the front sphere. Also, lights being reflected by the walls and spheres are brighter, since there are more indirect lights.</p>
+    <p>When max_ray_depth = 5, it becomes brighter on almost every surface since there are more indirect lights. But there is no significant difference.</p>
+    <p>When max_ray_depth = 100, the image is now brighter and more realistic, but still no significant difference.</p>
+
+
+    <h3 align="middle">Part 2: Microfacet Material</h3>
+	<h2>Link to the webpage:</h2>
+	<a href="https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj3-2/index.html">
+	https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj3-2/index.html
+	</a>
+
+</body>
+
 </html>
