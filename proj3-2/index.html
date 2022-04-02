@@ -94,6 +94,15 @@
 
 
     <h3 align="middle">Part 2: Microfacet Material</h3>
+    <p>
+      In this part, we implemented the Microfacet model, which is more specifically isotropic rough conductors that only reflect.
+      We first implement the BRDF evaluation function <b>f</b>. Then we implement the NDF function <b>D</b>, which 
+      defines how the microfacets' normals are distributed. In this implementation, we adopted Beckmann distribution.
+      Next, we implemented the function <b>F</b> for Fresnel term to evaluate the color information. At last,
+      we implement the importance sampling function in which we use PDFs to sample θ and Φ, and use them to do calculation
+      and get the final result.
+    </p>
+
     <p>Below are images rendered from <b>CBdragon_microfacet_au.dae</b> with alpha set to 0.005, 0.05, 
     0.25, 0.5:</p>
     <div align="middle">
