@@ -38,6 +38,7 @@
 
     <h3 align="middle">Part 1: Mirror and Glass Materials</h3>
 
+    <p>In this part, we mainly implemented the glass model. We first implemented the reflection, which is simply done by taking the opposite (negative) z, and the opposite of the entire ray. We also used Snell's law to implement refraction, and there is no refraction if it is total internal reflection. We also sample the glass by computing Fresnel coefficient and either reflect or refract based on it, but this is done by using Schlick's approximation since this is easier. Schlick's approximation gives a probability R and if coin_flip(R), we think this is a reflection, else refraction. If total internal reflection, as mentioned before, will only be a reflection.</p>
 
     <div align="middle">
       <table style="width=100%">
