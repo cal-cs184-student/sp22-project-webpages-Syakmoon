@@ -194,6 +194,46 @@
 
     <h3 align="middle">Part 3: Handling collisions with other objects</h3>
 
+	<p>In this section, we actually dealt with collision of the cloth with the sphere and plane.</p>
+	<p>For spheres, if we found that the cloth will go through the sphere’s surface in this step, we will make that false. We will calculate the tangent point of its touching position, and the correction vector to be tangent_point - last_position, and also the final position to be last_position + correction_vector * (1 - f). By applying this method, the cloth will never go through the sphere.</p>
+	<p>The planes are similar. The only difference is that we used projection to calculate the tangent point, and correction vector is now also tangent_point - last_position but adjusted by SURFACE_OFFSET.</p>
+	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="img/3-1.png" align="middle" width="1000px" />
+			  <figcaption align="middle">ks of 500 N/m, at rest</figcaption>
+			</td>
+		  </tr>
+		  <br>
+		  <tr>
+			<td>
+			  <img src="img/3-2.png" align="middle" width="1000px" />
+			  <figcaption align="middle">ks of 5000 N/m, at rest</figcaption>
+			</td>
+		  </tr>
+		  <br>
+		  <tr>
+			<td>
+			  <img src="img/3-3.png" align="middle" width="1000px" />
+			  <figcaption align="middle">ks of 50000 N/m, at rest</figcaption>
+			</td>
+		  </tr>
+		</table>
+	</div>
+	<p>Still, as in part 2, a cloth with higher ks is more rigid. It looks like a harder cloth and does not touch the sphere that much. The brim is also not pointing to the ground, but has a bigger angle pointing outside. But lower ks one is more soft. It looks as if a soft handkerchief is placed on the sphere, and it is more loose with a smaller angle for the brim.</p>
+
+	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="img/3-4.png" align="middle" width="1000px" />
+			  <figcaption align="middle">Shaded cloth lying peacefully at rest on the plane</figcaption>
+			</td>
+		  </tr>
+		</table>
+	</div>
+
 	<h2>Link to the webpage:</h2>
 	<a href="https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj4/index.html">
 	https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj4/index.html
