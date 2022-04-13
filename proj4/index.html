@@ -20,45 +20,530 @@
       font-family: 'Source Sans Pro', sans-serif;
     }
   </style>
-  <title>CS 184 Path Tracer</title>
+  <title>CS 184 Clothsim</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
 </head>
 
 
-
 <body>
-	<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
-	<h1 align="middle">Project 4: Cloth Sim</h1>
-	<h2 align="middle">Rui Wang, Zhuowen Chen, CS184-Team-19 (板烧鸡腿堡)</h2>
 
-	<br><br>
+  <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+  <h1 align="middle">Project 4: Clothsim</h1>
+  <h2 align="middle">Rui Wang, Zhuowen Chen, CS184-板烧鸡腿堡 aka team-19</h2>
 
-	<div>
+  <br><br>
 
-		<h3 align="middle">
-			Part 1: Masses and springs
-		</h3>
+  <div>
 
-		<h3 align="middle">
-			Part 2: Simulation via numerical integration
-		</h3>
+    <h3 align="middle">Part 1: Masses and springs</h3>
 
-		<h3 align="middle">
-			Part 3: Handling collisions with other objects
-		</h3>
+    <p>In this section, we build a grid for the cloth with a width of Cloth::num_width_points and a height of Cloth::num_height_points point numbers, and stretch a width of Cloth:width, and a height of Cloth::height.</p>
+	<p>These points are point masses, and there are virtual springs between them.</p>
+	<p>Structural constraints are between (x, y) and (x - 1, y), (x, y) and (x, y - 1).</p>
+	<p>Shearing constraints are between (x, y) and (x - 1, y - 1), (x, y) and (x + 1, y - 1).</p>
+	<p>Bending constraints are between (x, y) and (x - 2, y), (x, y) and (x, y - 2).</p>
 
-		<h3 align="middle">
-			Part 4: Handling self-collisions
-		</h3>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+			<td>
+			<img src="img/1-1.png" align="middle" width="1000px" />
+			<figcaption align="middle">Only structural and bending springs</figcaption>
+			</td>
+        </tr>
+        <br>
+        <tr>
+			<td>
+				<img src="img/1-2.png" align="middle" width="1000px" />
+				<figcaption align="middle">Only shearing springs</figcaption>
+			</td>
+        </tr>
+        <br>
+        <tr>
+			<td>
+				<img src="img/1-3.png" align="middle" width="1000px" />
+				<figcaption align="middle">Structural, bending, and shearing springs</figcaption>
+			</td>
+        </tr>
+      </table>
+    </div>
+	
+    <h3 align="middle">Part 2: Simulation via numerical integration</h3>
+	<p>In this section, we are really going to calculate the forces between point masses and external forces to make the cloth look like a real one.</p>
+	<p>We are given a vector of all the external accelerations, and with F = ma, we can easily calculate all the external forces.</p>
+	<p>Next, we will apply the total external force on the point masses.</p>
+	<p>The third step will be using Hooke’s Law to calculate the internal forces between the point masses in the cloth, and also multiply ks by a 0.2 constant for the bending constraints because they are weaker.</p>
+	<p>Next we will use Verlet integration to numerically calculate the change of position of the point masses, with a small damping factor applied to simulate frictions.</p>
+	<p>Lastly, we do not want the cloth to be too much stretched, otherwise it looks absurd and unreal. We used the algorithm introduced by the paper to correct the point masses to make the springs can stay in a range of 10% greater than their rest length. For pinned point masses, we give them the entire correction. If both are pinned point masses, this is not a valid situation and will be ignored.</p>
 
-		<h3 align="middle">
-			Part 5: Shaders
-		</h3>
+	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="img/2-1.png" align="middle" width="500px" />
+			  <figcaption align="middle">ks of 50 N/m, falling</figcaption>
+			</td>
+			<td>
+			  <img src="img/2-2.png" align="middle" width="500px" />
+			  <figcaption align="middle">ks of 50 N/m, at rest</figcaption>
+			</td>
+		  </tr>
+		  <br>
+		  <tr>
+			<td>
+				<img src="img/2-3.png" align="middle" width="500px" />
+				<figcaption align="middle">ks of 5000 N/m, falling</figcaption>
+			</td>
+			<td>
+				<img src="img/2-4.png" align="middle" width="500px" />
+				<figcaption align="middle">ks of 5000 N/m, at rest</figcaption>
+			</td>
+		  </tr>
+		  <br>
+		  <tr>
+			<td>
+				<img src="img/2-5.png" align="middle" width="500px" />
+				<figcaption align="middle">ks of 50000 N/m, falling</figcaption>
+			</td>
+			<td>
+				<img src="img/2-6.png" align="middle" width="500px" />
+				<figcaption align="middle">ks of 50000 N/m, at rest</figcaption>
+			</td>
+		  </tr>
+		</table>
+	</div>
+	<p>The higher ks it is, the more rigid it is. Low ks will create many wrinkles, but high ks make it like a piece of hard paper. This is also true for the process of falling down. High ks of 50000 N/m is simply like a piece of letter paper being expanded, but low ks of 50 N/m is more like clothes we have on our body.</p>
 
+	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="img/2-7.png" align="middle" width="500px" />
+			  <figcaption align="middle">Density of 1.5 g/cm^2, falling</figcaption>
+			</td>
+			<td>
+			  <img src="img/2-8.png" align="middle" width="500px" />
+			  <figcaption align="middle">Density of 1.5 g/cm^2, at rest</figcaption>
+			</td>
+		  </tr>
+		  <br>
+		  <tr>
+			<td>
+				<img src="img/2-9.png" align="middle" width="500px" />
+				<figcaption align="middle">Density of 15 g/cm^2, falling</figcaption>
+			</td>
+			<td>
+				<img src="img/2-10.png" align="middle" width="500px" />
+				<figcaption align="middle">Density of 15 g/cm^2, at rest</figcaption>
+			</td>
+		  </tr>
+		  <br>
+		  <tr>
+			<td>
+				<img src="img/2-11.png" align="middle" width="500px" />
+				<figcaption align="middle">Density of 150 g/cm^2, falling</figcaption>
+			</td>
+			<td>
+				<img src="img/2-12.png" align="middle" width="500px" />
+				<figcaption align="middle">Density of 150 g/cm^2, at rest</figcaption>
+			</td>
+		  </tr>
+		</table>
+	</div>
+	<p>However, this is the opposite for the value of density. At higher density, we can see more wrinkles but at low density there are not that many, and the cloth looks more smooth.</p>
+
+	<h3>IMPORTANT: THE FOLLOWINGS ARE GIF ANIMATIONS AND CAN BE VIEWED IN THE WEBPAGE ONLY!!!</h3>
+	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="img/2-13.gif" align="middle" width="1000px" />
+			  <figcaption align="middle">Damping factor of 0.02%. PLEASE VISIT THE WEBSITE TO VIEW THIS GIF!!!</figcaption>
+			</td>
+		  </tr>
+		  <br>
+		  <tr>
+			<td>
+			  <img src="img/2-14.gif" align="middle" width="1000px" />
+			  <figcaption align="middle">Damping factor of 0.5%. PLEASE VISIT THE WEBSITE TO VIEW THIS GIF!!!</figcaption>
+			</td>
+		  </tr>
+		  <br>
+		  <tr>
+			<td>
+			  <img src="img/2-15.gif" align="middle" width="1000px" />
+			  <figcaption align="middle">Damping factor of 0.2%. PLEASE VISIT THE WEBSITE TO VIEW THIS GIF!!!</figcaption>
+			</td>
+		  </tr>
+		</table>
+	</div>
+	<p>Finally, we show some gif animations to demonstrate how the damping factor can affect the cloth. With a small damping factor of 0.02%, the cloth’s point masses are easily affected by other forces, and in the macro view this looks like a very soft cloth material in the real world, which has many wrinkles and when falling down, the cloth needs to swing more to reach the rest state. But a high damping factor of 0.5% makes it like a soft cardboard, and the process of falling down takes more time as it is “hard”.</p>
+
+	<p>And here is the scene/pinned4.json cloth at its final resting state.</p>
+	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="img/2-16.png" align="middle" width="1000px" />
+			  <figcaption align="middle">scene/pinned4.json, at rest</figcaption>
+			</td>
+		  </tr>
+		</table>
 	</div>
 
-</body>
+    <h3 align="middle">Part 3: Handling collisions with other objects</h3>
 
+	<p>In this section, we actually dealt with collision of the cloth with the sphere and plane.</p>
+	<p>For spheres, if we found that the cloth will go through the sphere’s surface in this step, we will make that false. We will calculate the tangent point of its touching position, and the correction vector to be tangent_point - last_position, and also the final position to be last_position + correction_vector * (1 - f). By applying this method, the cloth will never go through the sphere.</p>
+	<p>The planes are similar. The only difference is that we used projection to calculate the tangent point, and correction vector is now also tangent_point - last_position but adjusted by SURFACE_OFFSET.</p>
+	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="img/3-1.png" align="middle" width="1000px" />
+			  <figcaption align="middle">ks of 500 N/m, at rest</figcaption>
+			</td>
+		  </tr>
+		  <br>
+		  <tr>
+			<td>
+			  <img src="img/3-2.png" align="middle" width="1000px" />
+			  <figcaption align="middle">ks of 5000 N/m, at rest</figcaption>
+			</td>
+		  </tr>
+		  <br>
+		  <tr>
+			<td>
+			  <img src="img/3-3.png" align="middle" width="1000px" />
+			  <figcaption align="middle">ks of 50000 N/m, at rest</figcaption>
+			</td>
+		  </tr>
+		</table>
+	</div>
+	<p>Still, as in part 2, a cloth with higher ks is more rigid. It looks like a harder cloth and does not touch the sphere that much. The brim is also not pointing to the ground, but has a bigger angle pointing outside. But lower ks one is more soft. It looks as if a soft handkerchief is placed on the sphere, and it is more loose with a smaller angle for the brim.</p>
+
+	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="img/3-4.png" align="middle" width="1000px" />
+			  <figcaption align="middle">Shaded cloth lying peacefully at rest on the plane</figcaption>
+			</td>
+		  </tr>
+		</table>
+	</div>
+
+	<h3 align="middle">Part 4: Handling self-collisions</h3>
+
+	<p>
+		In this part, we implement the self-collision of the cloth. We implement this feature with spatial
+		hashing. In every time step. we build a spatial map which is actually a hash map that maps a float
+		to a list of point masses which are all within a 3D volume box represented by the key float. With 
+		this map, we can simply traverse through all point masses and loop up for the point masses that are 
+		within the same 3D volume box of that point mass. If any pair of the point masses are within a limit distance
+		(here it is 2 * thickness) to each other, we will apply a repulsive force (i.e use a correction vector). 
+	</p>
+
+	<p>
+		Below are 3 screenshots that document how our cloth falls and folds on itself, starting with an early, 
+		initial self-collision and ending with the cloth at a more restful state:
+	</p>
+
+	<div align="middle">
+		<table style="width=100%">
+			<tr>
+				<td>
+					<img src="img/4-early.png" width="333px" />
+					<figcaption align="middle">Initial</figcaption>
+				</td>
+				<td>
+					<img src="img/4-middle.png" width="333px" />
+					<figcaption align="middle">Middle</figcaption>
+				</td>
+				<td>
+					<img src="img/4-restful.png" width="333px" />
+					<figcaption align="middle">Restful State</figcaption>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<p>
+		Below are 3 screenshots of cloth falling on itself with varied density in early-middle steps:
+	</p>
+
+	<div align="middle">
+		<table style="width=100%">
+			<tr>
+				<td>
+					<img src="img/4-density-1.png" width="333px" />
+					<figcaption align="middle">density = 1 g/cm^2</figcaption>
+				</td>
+				<td>
+					<img src="img/4-density-15.png" width="333px" />
+					<figcaption align="middle">density = 15 g/cm^2</figcaption>
+				</td>
+				<td>
+					<img src="img/4-density-250.png" width="333px" />
+					<figcaption align="middle">density = 250 g/cm^2</figcaption>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<p>
+		By comparing the above screenshots, we can see that when the cloth is falling down, if the density is
+		 smaller, there are fewer folds near the bottom of the cloth. When the density is larger, there are 
+		 many more smaller folds near the bottom of the cloth. Also, if the density is smaller, the folds are 
+		 larger and more curvy. 
+	</p>
+
+	<p>
+		Below are 3 screenshots of cloth falling on itself with varied ks in early-middle steps:
+	</p>
+
+	<div align="middle">
+		<table style="width=100%">
+			<tr>
+				<td>
+					<img src="img/4-ks-50.png" width="333px" />
+					<figcaption align="middle">ks = 50 N/m</figcaption>
+				</td>
+				<td>
+					<img src="img/4-ks-5k.png" width="333px" />
+					<figcaption align="middle">ks = 5,000 N/m</figcaption>
+				</td>
+				<td>
+					<img src="img/4-ks-50k.png" width="333px" />
+					<figcaption align="middle">ks = 50,000 N/m</figcaption>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<p>
+		By comparing the screenshots, we can see that when falling down, the cloth with lower ks has more 
+		 and smaller folds near the bottom, while the cloth with larger ks has less folds. And the cloth with 
+		higher ks has larger folds. The reason might be that cloth with higher ks is stiffer than cloth 
+		with lower ks.  
+	</p>
+
+	<h3 align="middle">Part 5: Shaders</h3>
+
+	<p>
+		In this part, we implement the GLSL shaders. A shader is a program that runs computation in parallel on 
+		GPU. It runs in the graphics pipeline, takes in input such as texture files, and outputs a single 4D 
+		vector containing the information like the out_color. 
+		<br><br>
+		Vertex shaders apply mathematical operations on the vertices. It allows one to modify the geometry of
+		vertices, like their position and normal vectors. An example is displacement.
+		<br>
+		Fragment shaders work on the fragments, which we get after raserization in the graphics pipeline.
+		Fragment shaders take in the attributes of the fragments and use them to calculate the color, then 
+		write it into out_color. 
+		<br>
+		The vertex and fragment shaders work together to create lighting and material effects. The vertex shader
+		takes in the attributes such as position and normal and writes into varyings for use of fragment shader.
+		The fragment shader computes and writes the results into the out colour.
+	</p>
+
+	<p>
+		In Blinn-Phong shading, we sum up the ambient, diffuse, and specular components to get the shading 
+		of the objects. Each component has its reflection coefficient (ka, kd, ks) and other parameters like 
+		the Ia, and p. The formula is as follows:
+		<img align="middle" src="img/5-phong-formula.png">
+	</p>
+
+	<p>
+		Below are screenshots of Blinn-Phong shader outputting only the ambient component, only outputting 
+		the diffuse component, only outputting the specular component, and using the entire Blinn-Phong model:
+	</p>
+
+	<div align="middle">
+		<table style="width=100%">
+			<tr>
+				<td>
+					<img src="img/5-phong-ambient.png" width="480px" />
+					<figcaption align="middle">Blinn-Phong, only ambient component</figcaption>
+				</td>
+				<td>
+					<img src="img/5-phong-diffuse.png" width="480px" />
+					<figcaption align="middle">Blinn-Phong, only diffuse component</figcaption>
+				</td>
+			</tr>
+			<br>
+			<tr>
+				<td>
+					<img src="img/5-phong-specular.png" width="480px" />
+					<figcaption align="middle">Blinn-Phong, only specular component</figcaption>
+				</td>
+				<td>
+					<img src="img/5-phong.png" width="480px" />
+					<figcaption align="middle">Blinn-Phong, entire model</figcaption>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<p>
+		Below are two screenshots of texture mapping shader using our own custom texture by modifying 
+		the textures in "/textures/":
+	</p>
+
+	<div align="middle">
+		<table style="width=100%">
+			<tr>
+				<td>
+					<img src="img/5-texture1.png" width="480px" />
+				</td>
+				<td>
+					<img src="img/5-texture2.png" width="480px" />
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<p>
+		Below are screenshots of bump mapping on the cloth and on the sphere:
+	</p>
+
+	<div align="middle">
+		<table style="width=100%">
+			<tr>
+				<td>
+					<img src="img/5-bump-cloth.png" width="480px" />
+					<figcaption align="middle">Bump Mapping, Cloth</figcaption>
+				</td>
+				<td>
+					<img src="img/5-bump-sphere.png" width="480px" />
+					<figcaption align="middle">Bump Mapping, Sphere</figcaption>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<p>
+		Below is a screenshot of displacement mapping on the sphere:
+	</p>
+
+	<div align="middle">
+		<table style="width=100%">
+			<tr>
+				<td>
+					<img src="img/5-displacement-sphere.png" width="960px" />
+					<figcaption align="middle">Displacement Mapping, Sphere</figcaption>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<p>
+		By comparing the above graphs, we can see the difference between bump mapping and displacement 
+		mapping. In bump mapping, the shape, or silhouette, of the sphere and the cloth is not 
+		changed. While displacement mapping changes the vertices' positions so that the surface of the 
+		objects has more rough features. 
+	</p>
+
+	<p>
+		Below are screenshots of bump and displacement mapping using different coarseness:
+	</p>
+
+	<div align="middle">
+		<table style="width=100%">
+			<tr>
+				<td>
+					<img src="img/5-bump-sphere16_16.png" width="500px">
+					<figcaption align="middle">Bump Mapping, -o 16 -a 16</figcaption>
+				</td>
+				<td>
+					<img src="img/5-bump-16_16.png" width="500px">
+					<figcaption align="middle">Bump Mapping, -o 16 -a 16</figcaption>
+				</td>
+			</tr>
+			<br>
+			<tr>
+				<td>
+					<img src="img/5-bump-sphere128_128.png" width="500px" />
+					<figcaption align="middle">Bump Mapping, -o 128 -a 128</figcaption>
+				</td>
+				<td>
+					<img src="img/5-bump-128_128.png" width="500px" />
+					<figcaption align="middle">Bump Mapping, -o 128 -a 128</figcaption>
+				</td>
+			</tr>
+			<br>
+			<tr>
+				<td>
+					<img src="img/5-displacement-sphere16_16.png" width="500px">
+					<figcaption align="middle">Displacement Mapping, -o 16 -a 16</figcaption>
+				</td>
+				<td>
+					<img src="img/5-displacement-16_16.png" width="500px">
+					<figcaption align="middle">Displacement Mapping, -o 16 -a 16</figcaption>
+				</td>
+			</tr>
+			<br>
+			<tr>
+				<td>
+					<img src="img/5-displacement-sphere128_128.png" width="500px" />
+					<figcaption align="middle">Displacement Mapping, -o 128 -a 128</figcaption>
+				</td>
+				<td>
+					<img src="img/5-displacement-128_128.png" width="500px" />
+					<figcaption align="middle">Displacement Mapping, -o 128 -a 128</figcaption>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<p>
+		By comparing the above screenshots, we can see that changing the coarseness does not have much
+		effect on the bump mapping since bump mapping is based on pixels rather than vertices. However, 
+		in displacement mapping, the increase in coarseness (16 to 128) brings noticeable change. We can 
+		see that when the coarseness is higher, more vertices are moved, and thus the rendered image is 
+		niticeably more detailed..  
+	</p>
+
+	<p>
+		Below are screenshots of our mirror shader on the cloth and on the sphere:
+	</p>
+
+	<div align="middle">
+		<table style="width=100%">
+			<tr>
+				<td>
+					<img src="img/5-mirror-cloth.png" width="480px" />
+					<figcaption align="middle">Mirror Shader, Cloth</figcaption>
+				</td>
+				<td>
+					<img src="img/5-mirror-sphere.png" width="480px" />
+					<figcaption align="middle">Mirror Shader, Sphere</figcaption>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<p>
+		In the cutom.frag, we just implemented similar thing to the texture.frag. We used a different 
+		texture png. 
+	</p>
+	
+	<div align="middle">
+		<table style="width=100%">
+			<tr>
+				<td>
+					<img src="img/5-custom.png" width="960px" />
+					<figcaption align="middle">Mirror Shader, Cloth</figcaption>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<h2>Link to the webpage:</h2>
+	<a href="https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj4/index.html">
+	https://cal-cs184-student.github.io/sp22-project-webpages-Syakmoon/proj4/index.html
+	</a>
+</body>
 
 </html>
